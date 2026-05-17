@@ -1,4 +1,6 @@
 import inquirer from 'inquirer';
+import fs from 'fs/promises';
+import path from 'path';
 import { TaskStore } from '../../core/task-store';
 import { Logger } from '../../utils/logger';
 
@@ -22,6 +24,26 @@ export async function newCommand(
     await store.initialize();
     
     let description = options.description;
+    
+    // Check if description is a file path and read it
+    if (description) {
+      try {
+        // Detect if it's a file path (ends with .md or contains path separators)
+        const isFilePath = description.endsWith('.md') ||
+                          description.includes('/') ||
+                          description.includes('\\');
+        
+        if (isFilePath) {
+          const filePath = path.resolve(description);
+          const fileContent = await fs.readFile(filePath, 'utf-8');
+          description = fileContent.trim();
+          Logger.info(`Loaded description from file: ${path.basename(description)}`);
+        }
+      } catch (error) {
+        // If file doesn't exist or can't be read, treat as regular string
+        Logger.warning(`Could not read file "${description}", using as text description`);
+      }
+    }
     
     // Prompt for description if not provided
     if (!description) {

@@ -1,12 +1,17 @@
 import chalk from 'chalk';
 import { TaskStore } from '../../core/task-store';
+import { ContextManager } from '../../core/context-manager';
 import { GitService } from '../../git/operations';
-import { generateCodePrompt } from '../../prompts/code-prompt';
+import { TemplateEngine } from '../../prompts/template-engine';
 import { Logger } from '../../utils/logger';
+import { Requirements, ImplementationPlan, RepoContext } from '../../core/types';
 
 export async function generateCommand(taskId: string): Promise<void> {
   try {
     const store = new TaskStore();
+    const contextMgr = new ContextManager(store);
+    const templateEngine = new TemplateEngine();
+    
     const task = await store.getTask(taskId);
     
     if (!task) {
@@ -22,6 +27,16 @@ export async function generateCommand(taskId: string): Promise<void> {
     Logger.header(`Generating Implementation Prompt: ${task.title}`);
     Logger.newline();
     
+    // Get accumulated context from analyze stage
+    const requirements = await contextMgr.getContext<Requirements>(taskId, 'requirements');
+    const implementationPlan = await contextMgr.getContext<ImplementationPlan>(taskId, 'implementationPlan');
+    const repoContext = await contextMgr.getContext<RepoContext>(taskId, 'repository');
+    
+    if (!requirements || !implementationPlan) {
+      Logger.error('Missing requirements or implementation plan. Run analyze first.');
+      process.exit(1);
+    }
+    
     // Create feature branch
     Logger.info('Creating feature branch...');
     const git = new GitService();
@@ -36,8 +51,24 @@ export async function generateCommand(taskId: string): Promise<void> {
     
     Logger.newline();
     
-    // Generate prompt for Bob Code mode
-    const prompt = generateCodePrompt(task);
+    // Generate prompt using template
+    const prompt = await templateEngine.render('code-template', {
+      TASK_TITLE: task.title,
+      USER_STORY: requirements.userStory,
+      ACCEPTANCE_CRITERIA: requirements.acceptanceCriteria.map((c: string, i: number) => `${i + 1}. ${c}`).join('\n'),
+      TECHNICAL_REQUIREMENTS: requirements.technicalRequirements.map((r: string) => `- ${r}`).join('\n'),
+      DEPENDENCIES: requirements.dependencies.length > 0 ? requirements.dependencies.map((d: string) => `- ${d}`).join('\n') : undefined,
+      IMPLEMENTATION_APPROACH: implementationPlan.approach,
+      FILES_TO_MODIFY: implementationPlan.filesToModify.map((f: any) => `- \`${f.path}\`: ${f.reason}`).join('\n'),
+      FILES_TO_CREATE: implementationPlan.filesToCreate.length > 0 ? implementationPlan.filesToCreate.map((f: any) => `- \`${f.path}\`: ${f.purpose}`).join('\n') : undefined,
+      TEST_STRATEGY: implementationPlan.testStrategy,
+      REPO_CONTEXT: repoContext ? true : undefined,
+      REPO_FRAMEWORK: repoContext?.framework,
+      REPO_LANGUAGE: repoContext?.language,
+      ROUTE_PATTERN: repoContext?.patterns.routePattern,
+      CONTROLLER_PATTERN: repoContext?.patterns.controllerPattern,
+      TEST_PATTERN: repoContext?.patterns.testPattern,
+    });
     
     // Display prompt
     Logger.box('Bob Code Mode Prompt');

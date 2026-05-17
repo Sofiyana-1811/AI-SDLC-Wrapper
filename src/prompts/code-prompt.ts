@@ -4,7 +4,7 @@ import { Task } from '../core/types';
  * Generate a prompt for Bob Code mode to implement the feature
  */
 export function generateCodePrompt(task: Task): string {
-  if (!task.artifacts.requirements || !task.artifacts.implementationPlan) {
+  if (!task.artifacts?.requirements || !task.artifacts?.implementationPlan) {
     throw new Error('Task must have requirements and implementation plan');
   }
   

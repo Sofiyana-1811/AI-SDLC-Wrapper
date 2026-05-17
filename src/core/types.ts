@@ -122,6 +122,54 @@ export const PRDescriptionSchema = z.object({
 
 export type PRDescription = z.infer<typeof PRDescriptionSchema>;
 
+// Context metadata tracking
+export const ContextMetadataSchema = z.object({
+  source: z.string(),           // Where context came from
+  gatheredAt: z.string(),       // When it was gathered
+  stage: z.string(),            // Which stage gathered it
+  tokenEstimate: z.number(),    // Estimated token count
+  reusable: z.boolean(),        // Can be reused in later stages
+});
+
+export type ContextMetadata = z.infer<typeof ContextMetadataSchema>;
+
+// Accumulated context storage
+export const AccumulatedContextSchema = z.object({
+  // Repository context (gathered once in analyze)
+  repository: RepoContextSchema.optional(),
+  repositoryMeta: ContextMetadataSchema.optional(),
+  
+  // Requirements (from analyze stage)
+  requirements: RequirementsSchema.optional(),
+  requirementsMeta: ContextMetadataSchema.optional(),
+  
+  // Implementation plan (from analyze stage)
+  implementationPlan: ImplementationPlanSchema.optional(),
+  implementationPlanMeta: ContextMetadataSchema.optional(),
+  
+  // Code changes (from generate stage)
+  codeChanges: CodeChangesSchema.optional(),
+  codeChangesMeta: ContextMetadataSchema.optional(),
+  
+  // Review report (from review stage)
+  reviewReport: ReviewReportSchema.optional(),
+  reviewReportMeta: ContextMetadataSchema.optional(),
+  
+  // PR description (from pr stage)
+  prDescription: PRDescriptionSchema.optional(),
+  prDescriptionMeta: ContextMetadataSchema.optional(),
+  
+  // Git information (gathered as needed)
+  gitDiff: z.any().optional(),
+  gitDiffMeta: ContextMetadataSchema.optional(),
+  
+  // Commit history
+  commits: z.array(z.any()).optional(),
+  commitsMeta: ContextMetadataSchema.optional(),
+});
+
+export type AccumulatedContext = z.infer<typeof AccumulatedContextSchema>;
+
 // Main task schema
 export const TaskSchema = z.object({
   id: z.string(),
@@ -131,6 +179,7 @@ export const TaskSchema = z.object({
   createdAt: z.string(),
   updatedAt: z.string(),
   
+  // Legacy artifacts (for backward compatibility)
   artifacts: z.object({
     requirements: RequirementsSchema.optional(),
     repoContext: RepoContextSchema.optional(),
@@ -138,7 +187,10 @@ export const TaskSchema = z.object({
     codeChanges: CodeChangesSchema.optional(),
     reviewReport: ReviewReportSchema.optional(),
     prDescription: PRDescriptionSchema.optional(),
-  }),
+  }).optional(),
+  
+  // New accumulated context with metadata
+  accumulatedContext: AccumulatedContextSchema.optional(),
 });
 
 export type Task = z.infer<typeof TaskSchema>;

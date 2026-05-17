@@ -87,10 +87,11 @@ Create a new feature task with a unique ID.
 ```bash
 ai-sdlc new "Add rate limiting to login endpoint"
 ai-sdlc new "Fix user profile update bug" -d "Users can't update email"
+ai-sdlc new "Implement OAuth2" -d ./specs/oauth-requirements.md
 ```
 
 **Options:**
-- `-d, --description <desc>` - Optional feature description
+- `-d, --description <desc>` - Optional feature description (text or path to .md file)
 
 **Output:**
 - Creates task with ID (e.g., FEATURE-001)

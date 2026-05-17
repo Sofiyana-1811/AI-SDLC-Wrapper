@@ -1,14 +1,19 @@
 import inquirer from 'inquirer';
 import chalk from 'chalk';
 import { TaskStore } from '../../core/task-store';
+import { ContextManager } from '../../core/context-manager';
 import { RepositoryAnalyzer } from '../../repo/analyzer';
-import { generatePlanPrompt } from '../../prompts/plan-prompt';
+import { TemplateEngine } from '../../prompts/template-engine';
 import { parsePlanResponse } from '../../utils/parser';
 import { Logger } from '../../utils/logger';
+import { RepoContext } from '../../core/types';
 
 export async function analyzeCommand(taskId: string): Promise<void> {
   try {
     const store = new TaskStore();
+    const contextMgr = new ContextManager(store);
+    const templateEngine = new TemplateEngine();
+    
     const task = await store.getTask(taskId);
     
     if (!task) {
@@ -19,15 +24,42 @@ export async function analyzeCommand(taskId: string): Promise<void> {
     Logger.header(`Analyzing Task: ${task.title}`);
     Logger.newline();
     
-    // Get repository context
-    Logger.info('Gathering repository context...');
-    const analyzer = new RepositoryAnalyzer();
-    const repoContext = await analyzer.analyze();
-    Logger.success('Repository context gathered');
+    // Check for existing repository context
+    let repoContext = await contextMgr.getContext<RepoContext>(taskId, 'repository');
+    
+    if (!repoContext) {
+      Logger.info('Gathering repository context...');
+      const analyzer = new RepositoryAnalyzer();
+      repoContext = await analyzer.analyze();
+      
+      // Store for reuse in later stages
+      await contextMgr.storeContext(taskId, 'repository', repoContext, {
+        source: 'RepositoryAnalyzer',
+        stage: 'analyze',
+        tokenEstimate: templateEngine.estimateTokens(JSON.stringify(repoContext)),
+        reusable: true,
+      });
+      
+      Logger.success('Repository context gathered and cached');
+    } else {
+      Logger.success('Using cached repository context');
+    }
     Logger.newline();
     
-    // Generate prompt for Bob Plan mode
-    const prompt = generatePlanPrompt(task, repoContext);
+    // Generate prompt using template
+    const prompt = await templateEngine.render('plan-template', {
+      TASK_TITLE: task.title,
+      TASK_DESCRIPTION: task.description,
+      REPO_CONTEXT: true,
+      REPO_TYPE: repoContext.projectType,
+      REPO_FRAMEWORK: repoContext.framework || 'N/A',
+      REPO_LANGUAGE: repoContext.language,
+      REPO_DEPENDENCIES: Object.keys(repoContext.dependencies).slice(0, 10).join(', '),
+      ROUTE_PATTERN: repoContext.patterns.routePattern,
+      CONTROLLER_PATTERN: repoContext.patterns.controllerPattern,
+      TEST_PATTERN: repoContext.patterns.testPattern,
+      RELEVANT_FILES: repoContext.relevantFiles.map((f: any) => `- \`${f.path}\` - ${f.reason}`).join('\n'),
+    });
     
     // Display prompt
     Logger.box('Bob Plan Mode Prompt');
@@ -59,14 +91,24 @@ export async function analyzeCommand(taskId: string): Promise<void> {
     Logger.info('Parsing Bob\'s analysis...');
     const { requirements, implementationPlan } = parsePlanResponse(bobResponse);
     
-    // Update task with artifacts
+    // Store requirements and implementation plan in accumulated context
+    await contextMgr.storeContext(taskId, 'requirements', requirements, {
+      source: 'Bob Plan Mode',
+      stage: 'analyze',
+      tokenEstimate: templateEngine.estimateTokens(JSON.stringify(requirements)),
+      reusable: true,
+    });
+    
+    await contextMgr.storeContext(taskId, 'implementationPlan', implementationPlan, {
+      source: 'Bob Plan Mode',
+      stage: 'analyze',
+      tokenEstimate: templateEngine.estimateTokens(JSON.stringify(implementationPlan)),
+      reusable: true,
+    });
+    
+    // Update task status
     await store.updateTask(taskId, {
       status: 'ready',
-      artifacts: {
-        requirements,
-        repoContext,
-        implementationPlan,
-      },
     });
     
     Logger.success('Requirements saved');
