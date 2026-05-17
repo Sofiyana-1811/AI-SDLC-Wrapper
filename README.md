@@ -13,6 +13,16 @@ The AI SDLC Wrapper orchestrates IBM Bob's capabilities (Plan mode, Code mode, R
 - **Git Integration**: Automatic branch management and change tracking
 - **PR Generation**: Comprehensive pull request descriptions from artifacts
 
+## 📚 Documentation
+
+- **[Quick Start Guide](./QUICKSTART.md)** - Get started in 5 minutes
+- **[Step-by-Step Tutorial](./STEP_BY_STEP_TUTORIAL.md)** - Complete walkthrough with examples
+- **[End-to-End Workflow](./END_TO_END_WORKFLOW.md)** - Complete architecture and data flow explanation
+- **[Complete Workflow Guide](./COMPLETE_WORKFLOW_GUIDE.md)** - Detailed CLI documentation
+- **[Testing Report](./TESTING_REPORT.md)** - Comprehensive testing documentation
+- **[Troubleshooting](./TROUBLESHOOTING.md)** - Common issues and solutions
+- **[Documentation Index](./DOCUMENTATION_INDEX.md)** - Complete documentation overview
+
 ## 🚀 Quick Start
 
 ### Installation
@@ -563,6 +573,45 @@ Built with IBM Bob IDE as the core AI engine.
 For issues and questions:
 - GitHub Issues: [github.com/yourusername/ai-sdlc-wrapper/issues](https://github.com/yourusername/ai-sdlc-wrapper/issues)
 - Documentation: [Full documentation](https://github.com/yourusername/ai-sdlc-wrapper/wiki)
+
+---
+
+## 🔧 Recent Fixes & Improvements
+
+### Build System Fixes
+- ✅ Fixed duplicate shebang issue causing syntax errors
+- ✅ Converted from CommonJS to ESM for chalk v5 compatibility
+- ✅ Updated package.json with `"type": "module"`
+- ✅ Tool now builds and runs successfully on all platforms
+
+### Documentation Enhancements
+- ✅ Added [Quick Start Guide](./QUICKSTART.md) for rapid onboarding
+- ✅ Created [Step-by-Step Tutorial](./STEP_BY_STEP_TUTORIAL.md) with complete example
+- ✅ Wrote [Complete Workflow Guide](./COMPLETE_WORKFLOW_GUIDE.md) with all CLI commands
+- ✅ Added [Troubleshooting Guide](./TROUBLESHOOTING.md) for common issues
+
+### Testing & Validation
+- ✅ Successfully tested on mcp-context-forge project
+- ✅ Created task FEATURE-004 for A2A Plugin Integration
+- ✅ Generated feature branch with implementation plan
+- ✅ Produced PR-ready description and artifacts
+
+---
+
+## 📖 Documentation Index
+
+| Document | Purpose | Audience |
+|----------|---------|----------|
+| [README.md](./README.md) | Main documentation and overview | Everyone |
+| [QUICKSTART.md](./QUICKSTART.md) | 5-minute setup guide | New users |
+| [STEP_BY_STEP_TUTORIAL.md](./STEP_BY_STEP_TUTORIAL.md) | Complete walkthrough with A2A example | Developers |
+| [END_TO_END_WORKFLOW.md](./END_TO_END_WORKFLOW.md) | Complete architecture and data flow | Architects |
+| [COMPLETE_WORKFLOW_GUIDE.md](./COMPLETE_WORKFLOW_GUIDE.md) | Detailed CLI reference | Power users |
+| [TESTING_REPORT.md](./TESTING_REPORT.md) | Comprehensive testing documentation | QA/Testers |
+| [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) | Common issues and solutions | Support |
+| [DOCUMENTATION_INDEX.md](./DOCUMENTATION_INDEX.md) | Complete documentation overview | Everyone |
+| [AUTOMATION_PLAN.md](./AUTOMATION_PLAN.md) | Orchestrator design | Contributors |
+| [ENHANCEMENT_PLAN.md](./ENHANCEMENT_PLAN.md) | Future improvements | Contributors |
 
 ---
 

@@ -2,9 +2,10 @@
   "name": "ai-sdlc-wrapper",
   "version": "1.0.0",
   "description": "AI-powered SDLC workflow automation with IBM Bob",
-  "main": "dist/cli/index.js",
+  "type": "module",
+  "main": "dist/index.js",
   "bin": {
-    "ai-sdlc": "dist/cli/index.js"
+    "ai-sdlc": "dist/index.js"
   },
   "scripts": {
     "build": "tsup",
