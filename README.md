@@ -45,6 +45,25 @@ This will:
 
 ### Create Your First Feature
 
+#### 🚀 Automated Workflow (Recommended)
+
+Execute the entire SDLC in one command:
+
+```bash
+# Interactive mode (with approval gates)
+ai-sdlc run "Add rate limiting to login endpoint"
+
+# Fully automated (no approvals needed)
+ai-sdlc run "Add rate limiting to login endpoint" --auto-approve
+
+# With description
+ai-sdlc run "Add rate limiting" -d "Prevent brute force attacks"
+```
+
+#### 📝 Step-by-Step Workflow (Legacy)
+
+Or use individual commands for each stage:
+
 ```bash
 # 1. Create a new feature task
 ai-sdlc new "Add rate limiting to login endpoint"
@@ -63,6 +82,46 @@ ai-sdlc pr FEATURE-001
 ```
 
 ## 📋 Commands
+
+### `ai-sdlc run <title>` (New - Automated Workflow)
+
+Execute the complete SDLC workflow in one command.
+
+```bash
+ai-sdlc run "Add rate limiting to login endpoint"
+ai-sdlc run "Feature title" -d "Description" --auto-approve
+```
+
+**Options:**
+- `-d, --description <desc>` - Feature description (text or path to .md file)
+- `-a, --auto-approve` - Skip approval gates (full automation)
+- `-i, --interactive` - Interactive mode with progress updates (default)
+- `--skip-stages <stages>` - Skip specific stages (comma-separated)
+
+**What it does:**
+1. Creates task with unique ID
+2. Gathers repository context (cached for reuse)
+3. Generates orchestrator prompt for Bob
+4. Displays prompt for you to copy to Bob IDE
+5. Bob executes all SDLC stages internally:
+   - Analyze requirements (sdlc-plan skill)
+   - Implement code (sdlc-code skill)
+   - Review changes (sdlc-review skill)
+   - Generate PR description (sdlc-deliver skill)
+6. You paste Bob's response back
+7. CLI parses all artifacts and saves them
+8. Task is complete and PR-ready!
+
+**Benefits:**
+- ✅ Single copy-paste operation (vs. 4 separate ones)
+- ✅ Bob handles entire workflow internally
+- ✅ Optional approval gates for oversight
+- ✅ All artifacts returned together
+- ✅ Full traceability maintained
+
+**Next step:** Review code, run tests, create PR
+
+---
 
 ### `ai-sdlc init`
 
@@ -249,9 +308,42 @@ your-project/
 └── [your project files]
 ```
 
-## 🔄 Complete Workflow Example
+## 🔄 Complete Workflow Examples
 
-### Scenario: Add Rate Limiting to Login Endpoint
+### 🚀 Automated Workflow (Recommended)
+
+**Scenario: Add Rate Limiting to Login Endpoint**
+
+```bash
+# 1. Initialize (one-time setup)
+ai-sdlc init
+
+# 2. Run complete SDLC workflow
+ai-sdlc run "Add rate limiting to login endpoint"
+
+# What happens:
+# ✓ Task FEATURE-001 created
+# ✓ Repository context gathered
+# ✓ Orchestrator prompt generated
+# → Copy prompt to Bob IDE (once)
+# → Bob executes all stages internally:
+#   - Analyzes requirements
+#   - Implements code
+#   - Reviews changes
+#   - Generates PR description
+# → Copy Bob's response back (once)
+# ✓ All artifacts parsed and saved
+# ✓ Task complete!
+
+# 3. Create pull request
+# Use the generated PR description from .ai-sdlc/tasks/FEATURE-001/pr-description.md
+```
+
+**Total copy-paste operations: 2** (vs. 8 in step-by-step workflow)
+
+### 📝 Step-by-Step Workflow (Legacy)
+
+**Scenario: Add Rate Limiting to Login Endpoint**
 
 ```bash
 # 1. Initialize (one-time setup)
@@ -288,6 +380,8 @@ ai-sdlc pr FEATURE-001
 # - Generates comprehensive PR description
 # - Ready to create pull request
 ```
+
+**Total copy-paste operations: 8**
 
 ## 🎯 Key Features
 

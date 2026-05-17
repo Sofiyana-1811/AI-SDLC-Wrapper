@@ -202,8 +202,76 @@ export const ConfigSchema = z.object({
   framework: z.string().optional(),
   language: z.string(),
   initializedAt: z.string(),
+  automation: z.object({
+    autoApprove: z.boolean(),
+    approvalTimeout: z.number(),
+    retryOnFailure: z.boolean(),
+    maxRetries: z.number(),
+  }).optional(),
+  orchestrator: z.object({
+    enabled: z.boolean(),
+    defaultMode: z.enum(['interactive', 'auto']),
+    skipStages: z.array(z.string()),
+  }).optional(),
 });
 
 export type Config = z.infer<typeof ConfigSchema>;
+
+// Orchestrator types
+export const OrchestratorInputSchema = z.object({
+  title: z.string(),
+  description: z.string().optional(),
+  autoApprove: z.boolean(),
+  repoContext: RepoContextSchema,
+  skipStages: z.array(z.string()).optional(),
+});
+
+export type OrchestratorInput = z.infer<typeof OrchestratorInputSchema>;
+
+export const OrchestratorResultSchema = z.object({
+  status: z.enum(['success', 'partial', 'failed']),
+  completedStages: z.array(z.string()),
+  artifacts: z.object({
+    requirements: RequirementsSchema.optional(),
+    implementationPlan: ImplementationPlanSchema.optional(),
+    codeChanges: CodeChangesSchema.optional(),
+    reviewReport: ReviewReportSchema.optional(),
+    prDescription: PRDescriptionSchema.optional(),
+  }),
+  approvals: z.record(z.boolean()),
+  errors: z.array(z.object({
+    stage: z.string(),
+    message: z.string(),
+    recoverable: z.boolean().optional(),
+  })).optional(),
+});
+
+export type OrchestratorResult = z.infer<typeof OrchestratorResultSchema>;
+
+// Approval configuration
+export const ApprovalConfigSchema = z.object({
+  enabled: z.boolean(),
+  timeout: z.number(),
+  requireConfirmation: z.boolean(),
+});
+
+export type ApprovalConfig = z.infer<typeof ApprovalConfigSchema>;
+
+export const ApprovalHistorySchema = z.object({
+  taskId: z.string(),
+  stage: z.string(),
+  approved: z.boolean(),
+  timestamp: z.string(),
+  reason: z.string().optional(),
+});
+
+export type ApprovalHistory = z.infer<typeof ApprovalHistorySchema>;
+
+// Orchestrator options
+export interface OrchestratorOptions {
+  autoApprove?: boolean;
+  interactive?: boolean;
+  skipStages?: string[];
+}
 
 // Made with Bob

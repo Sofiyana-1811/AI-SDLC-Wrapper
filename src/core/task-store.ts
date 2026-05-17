@@ -134,6 +134,17 @@ export class TaskStore {
   }
   
   /**
+   * Save PR description to a separate file
+   */
+  async savePRDescription(id: string, description: string): Promise<void> {
+    const taskDir = path.join(this.tasksDir, id);
+    await fs.mkdir(taskDir, { recursive: true });
+    
+    const prPath = path.join(taskDir, 'pr-description.md');
+    await fs.writeFile(prPath, description, 'utf-8');
+  }
+  
+  /**
    * Generate the next task ID
    */
   private generateNextId(tasks: Task[]): string {

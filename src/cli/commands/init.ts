@@ -38,11 +38,22 @@ export async function initCommand(): Promise<void> {
     
     // Save configuration
     const config: Config = {
-      version: '1.0.0',
+      version: '2.0.0',
       projectType: context.projectType,
       framework: context.framework,
       language: context.language,
       initializedAt: new Date().toISOString(),
+      automation: {
+        autoApprove: false,
+        approvalTimeout: 300,
+        retryOnFailure: true,
+        maxRetries: 3,
+      },
+      orchestrator: {
+        enabled: true,
+        defaultMode: 'interactive',
+        skipStages: [],
+      },
     };
     
     await fs.writeFile(
@@ -51,6 +62,7 @@ export async function initCommand(): Promise<void> {
     );
     
     Logger.success('Created configuration file');
+    Logger.info('Automation settings: Interactive mode (approval gates enabled)');
     
     // Display next steps
     Logger.newline();

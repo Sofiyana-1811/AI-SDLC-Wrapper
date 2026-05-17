@@ -7,6 +7,7 @@ import { analyzeCommand } from './commands/analyze';
 import { generateCommand } from './commands/generate';
 import { reviewCommand } from './commands/review';
 import { prCommand } from './commands/pr';
+import { runCommand } from './commands/run';
 
 const program = new Command();
 
@@ -88,6 +89,28 @@ program
   .action(async (taskId: string) => {
     try {
       await prCommand(taskId);
+    } catch (error) {
+      console.error(chalk.red('Error:'), error instanceof Error ? error.message : 'Unknown error');
+      process.exit(1);
+    }
+  });
+
+// Run command (automated workflow)
+program
+  .command('run <title>')
+  .description('Execute complete SDLC workflow (automated)')
+  .option('-d, --description <desc>', 'Feature description')
+  .option('-a, --auto-approve', 'Skip approval gates (full automation)')
+  .option('-i, --interactive', 'Interactive mode with progress updates')
+  .option('--skip-stages <stages>', 'Skip specific stages (comma-separated)')
+  .action(async (title: string, options: {
+    description?: string;
+    autoApprove?: boolean;
+    interactive?: boolean;
+    skipStages?: string;
+  }) => {
+    try {
+      await runCommand(title, options);
     } catch (error) {
       console.error(chalk.red('Error:'), error instanceof Error ? error.message : 'Unknown error');
       process.exit(1);
